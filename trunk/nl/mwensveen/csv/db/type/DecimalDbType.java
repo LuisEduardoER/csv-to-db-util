@@ -28,6 +28,7 @@
 package nl.mwensveen.csv.db.type;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -56,13 +57,19 @@ public class DecimalDbType implements DbType {
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getInsertValue(int, java.sql.ResultSet)
 	 */
 	public String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException {
-		BigDecimal bd = resultSet.getBigDecimal(columnNumber);
+		BigDecimal bd = getValue(columnNumber, resultSet);
 		if (bd==null) {
 			return "0";
 		}
 		return bd.toPlainString();
 	}
 
+	/**
+	 * @throws SQLException 
+	 */
+	private BigDecimal getValue(int columnNumber, ResultSet resultSet) throws SQLException {
+		return resultSet.getBigDecimal(columnNumber);
+	}
 	/**
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getSqlType()
 	 */
@@ -96,6 +103,14 @@ public class DecimalDbType implements DbType {
 	 */
 	public int getPrecision() {
 		return precision;
+	}
+
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		preparedStatement.setBigDecimal(i, getValue(j, resultSet));
+		
 	}
 
 }

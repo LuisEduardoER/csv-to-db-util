@@ -27,8 +27,15 @@
  */
 package nl.mwensveen.csv.db.type;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import nl.mwensveen.csv.db.type.api.DbType;
 
@@ -37,14 +44,36 @@ import nl.mwensveen.csv.db.type.api.DbType;
  *
  */
 public class TimestampDbType implements DbType {
+	private static final String timePattern = "yyyy-MM-dd hh:mm:ss";
+	private DateFormat df = new SimpleDateFormat();
+
+	public TimestampDbType() {
+		this(timePattern);
+	}
+	
+	public TimestampDbType(String timePattern) {
+		super();
+		df = new SimpleDateFormat(timePattern);
+	}
 
 	/**
 	 * @throws SQLException 
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getInsertValue(int, java.sql.ResultSet)
 	 */
 	public String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException {
-		java.sql.Timestamp ts = resultSet.getTimestamp(columnNumber);
+		Timestamp ts = getValue(columnNumber, resultSet); 
 		return "'" + ts.toString() + "'";
+	}
+
+	private Timestamp getValue(int columnNumber, ResultSet resultSet) throws SQLException {
+		String timeStr = resultSet.getString(columnNumber);
+		try {
+			Date date = df.parse(timeStr);
+			Timestamp t = new Timestamp(date.getTime());
+			return t;
+		} catch (ParseException e) {
+			throw new SQLException("Error parsing time", e);
+		}
 	}
 
 	/**
@@ -54,4 +83,10 @@ public class TimestampDbType implements DbType {
 		return "TIMESTAMP";
 	}
 
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		preparedStatement.setTimestamp(i, getValue(j, resultSet));
+	}	
 }

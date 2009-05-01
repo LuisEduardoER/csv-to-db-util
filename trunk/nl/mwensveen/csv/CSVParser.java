@@ -172,6 +172,14 @@ public class CSVParser {
 		if (!toDb) {
 			resultSet.createMetaData(metaData, maxColumns);
 		}
+		if (toDb) {
+			try {
+				dbCreationUtil.finish();
+			} catch (SQLException e) {
+				log.error("Error finishing DbCreation", e);
+				throw new CSVParserException("Error finishing DbCreation", e);
+			}
+		}
 		resultSet.resetIndex();
 		return resultSet;
 	}

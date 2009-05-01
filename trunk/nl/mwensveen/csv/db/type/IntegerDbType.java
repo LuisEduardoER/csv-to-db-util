@@ -27,6 +27,7 @@
  */
 package nl.mwensveen.csv.db.type;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -43,8 +44,12 @@ public class IntegerDbType implements DbType {
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getInsertValue(int, java.sql.ResultSet)
 	 */
 	public String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException {
-		int i = resultSet.getInt(columnNumber);
+		int i = getValue(columnNumber, resultSet);
 		return java.lang.Integer.toString(i);
+	}
+	
+	private int getValue(int columnNumber, ResultSet resultSet) throws SQLException {
+		return resultSet.getInt(columnNumber);
 	}
 
 	/**
@@ -53,6 +58,14 @@ public class IntegerDbType implements DbType {
 	public String getSqlType() {
 		// TODO Auto-generated method stub
 		return "INTEGER";
+	}
+
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		preparedStatement.setInt(i, getValue(j, resultSet));
+		
 	}
 
 }

@@ -27,6 +27,7 @@
  */
 package nl.mwensveen.csv.db.type.api;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -50,4 +51,15 @@ public interface DbType {
 	 * @throws SQLException
 	 */
 	String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException;
+
+	/**
+	 * Insert the value into the given PreparedStatement.
+	 * E.g. call preparedStatement.setByte(i, resultset.getByte("myColumn");
+	 * @param preparedStatement
+	 * @param preparedStatementIndex parameterIndex
+	 * @param resultSet
+	 * @param resultSetIndex 
+	 * @throws SQLException 
+	 */
+	void insertIntoPreparedStatement(PreparedStatement preparedStatement, int preparedStatementIndex, ResultSet resultSet, int resultSetIndex) throws SQLException;
 }

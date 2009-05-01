@@ -27,6 +27,8 @@
  */
 package nl.mwensveen.csv.db.type;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -45,8 +47,12 @@ public class DateDbType implements DbType {
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getInsertValue(int, java.sql.ResultSet)
 	 */
 	public String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException {
-		java.sql.Date value = resultSet.getDate(columnNumber);
+		java.sql.Date value = getValue(columnNumber, resultSet);
 		return "'" + df.format(value) + "'";
+	}
+
+	private Date getValue(int columnNumber, ResultSet resultSet) throws SQLException {
+		return resultSet.getDate(columnNumber);
 	}
 
 	/**
@@ -54,6 +60,14 @@ public class DateDbType implements DbType {
 	 */
 	public String getSqlType() {
 		return "DATE";
+	}
+
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		preparedStatement.setDate(i, getValue(j, resultSet));
+		
 	}
 
 }

@@ -27,6 +27,7 @@
  */
 package nl.mwensveen.csv.db.type;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -43,15 +44,25 @@ public class BigIntDbType implements DbType {
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getInsertValue(int, java.sql.ResultSet)
 	 */
 	public String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException {
-		long value = resultSet.getLong(columnNumber);
-		return Long.toString(value);
+		return Long.toString(getValue(columnNumber, resultSet));
 	}
 
+	private long getValue(int columnNumber, ResultSet resultSet) throws SQLException {
+		return resultSet.getLong(columnNumber);
+	}
 	/**
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getSqlType()
 	 */
 	public String getSqlType() {
 		return "BIGINT";
 	}
+
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		preparedStatement.setLong(i, getValue(j, resultSet));
+	}
+
 
 }

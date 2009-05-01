@@ -27,6 +27,7 @@
  */
 package nl.mwensveen.csv.db.type;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -43,8 +44,12 @@ public class DoubleDbType implements DbType {
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getInsertValue(int, java.sql.ResultSet)
 	 */
 	public String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException {
-		double d = resultSet.getDouble(columnNumber);
-		return java.lang.Double.toString(d);
+		double d = getValue(columnNumber, resultSet); 
+		return Double.toString(d);
+	}
+
+	private double getValue(int columnNumber, ResultSet resultSet) throws SQLException {
+		return resultSet.getDouble(columnNumber);
 	}
 
 	/**
@@ -52,6 +57,13 @@ public class DoubleDbType implements DbType {
 	 */
 	public String getSqlType() {
 		return "DOUBLE PRECISION";
+	}
+
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		preparedStatement.setDouble(i, getValue(j, resultSet));
 	}
 
 }
