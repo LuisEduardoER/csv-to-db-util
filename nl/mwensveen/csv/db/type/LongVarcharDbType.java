@@ -27,6 +27,7 @@
  */
 package nl.mwensveen.csv.db.type;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.StringTokenizer;
@@ -44,7 +45,7 @@ public class LongVarcharDbType implements DbType {
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getInsertValue(int, java.sql.ResultSet)
 	 */
 	public String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException {
-		String value = resultSet.getString(columnNumber);
+		String value = getValue(columnNumber, resultSet);
 		String returnValue = "";
 		StringTokenizer st = new StringTokenizer(value, "'");
 		while (st.hasMoreElements()) {
@@ -57,11 +58,22 @@ public class LongVarcharDbType implements DbType {
 		return "'" + returnValue + "'";
 	}
 
+	private String getValue(int columnNumber, ResultSet resultSet) throws SQLException {
+		return resultSet.getString(columnNumber);
+	}
+
 	/**
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getSqlType()
 	 */
 	public String getSqlType() {
 		return "long varchar";
+	}
+
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		preparedStatement.setString(i, getValue(j, resultSet));
 	}
 
 }

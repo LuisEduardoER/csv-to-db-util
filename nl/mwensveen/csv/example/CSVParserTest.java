@@ -42,11 +42,21 @@ import nl.mwensveen.csv.CSVParser;
 import nl.mwensveen.csv.CSVParserException;
 import nl.mwensveen.csv.db.DbConfig;
 import nl.mwensveen.csv.db.DbCreationUtil;
+import nl.mwensveen.csv.db.type.BigIntDbType;
 import nl.mwensveen.csv.db.type.CharDbType;
 import nl.mwensveen.csv.db.type.DateDbType;
 import nl.mwensveen.csv.db.type.DecimalDbType;
+import nl.mwensveen.csv.db.type.DoubleDbType;
+import nl.mwensveen.csv.db.type.FloatDbType;
 import nl.mwensveen.csv.db.type.IntegerDbType;
+import nl.mwensveen.csv.db.type.LongVarcharDbType;
+import nl.mwensveen.csv.db.type.NumericDbType;
+import nl.mwensveen.csv.db.type.RealDbType;
 import nl.mwensveen.csv.db.type.SequentialPrimaryKey;
+import nl.mwensveen.csv.db.type.SmallIntDbType;
+import nl.mwensveen.csv.db.type.TimeDbType;
+import nl.mwensveen.csv.db.type.TimestampDbType;
+import nl.mwensveen.csv.db.type.VarcharDbType;
 import nl.mwensveen.csv.db.type.api.DbType;
 
 /**
@@ -65,8 +75,8 @@ public class CSVParserTest {
 		processDB(csvParser, new BufferedReader(new FileReader(args[0])));
 		System.out.println(dbConfig.getJdbcUrl());
 		
-		csvParser = new CSVParser(createCSVConfig());
-		processRSDB(csvParser, new BufferedReader(new FileReader(args[0])));
+//		csvParser = new CSVParser(createCSVConfig());
+//		processRSDB(csvParser, new BufferedReader(new FileReader(args[0])));
 	}
 
 	private static DbConfig createDBConfig(String dbName) {
@@ -74,14 +84,26 @@ public class CSVParserTest {
 		Map<String, DbType> dbTypes = new HashMap<String, DbType>();
 		config.setDataTypes(dbTypes);
 		// Setup the datetypes for (some) columns, by column-name or index (starting with 1).
-		dbTypes.put("StartDate", new DateDbType());
-		dbTypes.put("3", new IntegerDbType());
-		dbTypes.put("4", new CharDbType());
-		dbTypes.put("Amount", new DecimalDbType(10,2));
-		config.setCreateTable(true);
-		config.setExtraColumn(new SequentialPrimaryKey());
+		dbTypes.put("1", new BigIntDbType() );
+		dbTypes.put("2", new CharDbType() );
+		dbTypes.put("3", new DateDbType());
+		dbTypes.put("4", new DecimalDbType());
+		dbTypes.put("5", new DoubleDbType());
+		dbTypes.put("6", new FloatDbType());
+		dbTypes.put("7", new IntegerDbType());
+		dbTypes.put("8", new LongVarcharDbType());
+		dbTypes.put("9", new NumericDbType());
+		dbTypes.put("10", new RealDbType());
+		dbTypes.put("11", new SmallIntDbType());
+		dbTypes.put("12", new TimeDbType());
+		dbTypes.put("13", new TimestampDbType());
+		dbTypes.put("14", new VarcharDbType());
+		config.setCreateTable(false);
+		config.setExtraColumn(new SequentialPrimaryKey(40));
+		config.setExtraColumnName("RowNumber");
 		config.setTableName("Data");
 		config.setDataBaseName(dbName);
+		config.setUsePreparedStatement(true);
 		// Specify a jdbc connection url, or use the default derby.
 		//  config.setJdbcUrl("jdbc:oracle:.....")
 		return config;
@@ -93,7 +115,7 @@ public class CSVParserTest {
 		// Dutch style, use a ',' as decimal point
 		config.setDecimalPoint(',');
 		// define a seperator if it's not ','. Eg tab.
-		// config.setSeperator('\t');
+		config.setSeperator(';');
 		// define a dateFormat is needed.
 		config.setDatePattern("yyyyMMdd");
 		config.setStartWithMetaDataRow(true);

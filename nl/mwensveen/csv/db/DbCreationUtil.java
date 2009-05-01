@@ -27,26 +27,30 @@
  */
 package nl.mwensveen.csv.db;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.log4j.Logger;
+
+import nl.mwensveen.csv.CSVParser;
 import nl.mwensveen.csv.db.type.LongVarcharDbType;
 import nl.mwensveen.csv.db.type.api.DbType;
 
 /**
- * This utility will put the ResultSet (of the CSVParser) into a database. This way, the CSV file cannot only be processed once in a sequential order,
+ * This utility will put the ResultSet (of the CSVParser) into a database. 
+ * This way, the CSV file cannot only be processed once in a sequential order,
  * but can also be used to query. Default DB is the Apache Derby 10.4.1.3.
  * 
  * @author Micha Wensveen.
  */
 public class DbCreationUtil {
+	private Logger log = Logger.getLogger(DbCreationUtil.class);
 	private DbConfig config;
-	private Connection connection;
 	private Statement st;
+	private PreparedStatement preparedStatement;
 
 	public DbCreationUtil() {
 		this(new DbConfig());
@@ -55,6 +59,11 @@ public class DbCreationUtil {
 	public DbCreationUtil(DbConfig config) {
 		super();
 		this.config = config;
+		if (config.getDbConnectionManager() == null) {
+			// use the default one
+			config.setDbConnectionManager(new DefaultDbConnectionManager());
+		}
+		config.getDbConnectionManager().setConfig(config);
 	}
 
 	/**
@@ -69,26 +78,39 @@ public class DbCreationUtil {
 		try {
 			init(resultset.getMetaData());
 			processResultSet(resultset);
-			while (resultset.next()) {
-				String insertStatement = makeInsertStatement(resultset);
-				st.execute(insertStatement);
-			}
 		} finally {
-			close();
+			finish();
 		}
 		return config.getJdbcUrl();
 	}
 
 	/**
 	 * Process all records in the ResultSet to rows in the DB.
+	 * 
 	 * @param resultset
 	 * @throws SQLException
 	 */
 	public void processResultSet(ResultSet resultset) throws SQLException {
 		while (resultset.next()) {
-			String insertStatement = makeInsertStatement(resultset);
-			st.execute(insertStatement);
+			if (config.isUsePreparedStatement()) {
+				insertWithPreparedStatement(resultset);
+			} else {
+				insertWithStatement(resultset);
+			}
 		}
+	}
+
+	/**
+	 * Insert a row into the database using a normal statement.
+	 * @param resultset
+	 * @throws SQLException
+	 */
+	private void insertWithStatement(ResultSet resultset) throws SQLException {
+		String insertStatement = makeInsertStatement(resultset);
+		if (log.isDebugEnabled()) {
+			log.debug("Inserting: " + insertStatement);
+		}
+		st.execute(insertStatement);
 	}
 
 	/**
@@ -99,34 +121,36 @@ public class DbCreationUtil {
 	 */
 	public void init(ResultSetMetaData resultSetMetaData) throws SQLException {
 		config.checkProperties();
-		connection = DriverManager.getConnection(config.getJdbcUrl());
-		st = connection.createStatement();
 
 		if (config.isCreateTable()) {
+			st = config.getDbConnectionManager().getConnection().createStatement();
 			String creatTableStatement = makeCreateTableStatement(resultSetMetaData);
+			if (log.isDebugEnabled()) {
+				log.debug("Creation statement: " + creatTableStatement);
+			}
 			st.execute(creatTableStatement);
+		} else if (!config.isUsePreparedStatement()) {
+			st = config.getDbConnectionManager().getConnection().createStatement();
 		}
 	}
 
 	/**
-	 * close the connection.
+	 * Finish the creation of the table.
 	 * 
 	 * @throws SQLException
 	 */
-	public void close() throws SQLException {
-		if (st != null && !st.isClosed()) {
+	public void finish() throws SQLException {
+		if (st != null) {
 			st.close();
 		}
-		if (connection != null && !connection.isClosed()) {
-			connection.close();
-		}
+		config.getDbConnectionManager().close();
 	}
 
 	/**
-	 * Create the statement that will insert one row into the table.
+	 * Create the statement-string that will insert one row into the table.
 	 * 
 	 * @param resultset
-	 * @return
+	 * @return String
 	 * @throws SQLException
 	 */
 	private String makeInsertStatement(ResultSet resultset) throws SQLException {
@@ -158,6 +182,62 @@ public class DbCreationUtil {
 	}
 
 	/**
+	 * Use a preparedStatement to create the new row in the database.
+	 * 
+	 * @param resultSet
+	 * @throws SQLException
+	 */
+	private void insertWithPreparedStatement(ResultSet resultSet) throws SQLException {
+		if (preparedStatement == null) {
+			makePreparedStatement(resultSet.getMetaData());
+		}
+		ResultSetMetaData metaData = resultSet.getMetaData();
+		int j = 0;
+		if (config.getExtraColumn() != null) {
+			config.getExtraColumn().insertIntoPreparedStatement(preparedStatement, 1, resultSet, j);
+			j++;
+		}
+		for (int i = 1; i <= metaData.getColumnCount(); i++) {
+			DbType type = getDataType(i, metaData);
+			type.insertIntoPreparedStatement(preparedStatement, i + j, resultSet, i);
+		}
+		preparedStatement.execute();
+	}
+
+	/**
+	 * Create the preparedStatement.
+	 * 
+	 * @param metaData
+	 * @throws SQLException
+	 */
+	private void makePreparedStatement(ResultSetMetaData metaData) throws SQLException {
+		StringBuilder ps = new StringBuilder();
+
+		ps.append("insert into ");
+		ps.append(config.getTableName());
+		ps.append(" values (");
+
+		boolean firstColumn = true;
+		if (config.getExtraColumn() != null) {
+			ps.append("?");
+			firstColumn = false;
+		}
+
+		int count = metaData.getColumnCount();
+		for (int i = 1; i <= count; i++) {
+			if (!firstColumn) {
+				ps.append(", ");
+			} else {
+				firstColumn = false;
+			}
+			ps.append(" ?");
+		}
+		ps.append(")");
+
+		preparedStatement = config.getDbConnectionManager().getConnection().prepareStatement(ps.toString());
+	}
+
+	/**
 	 * Create the statement that will create the database Table.
 	 * 
 	 * @param metaData ResultSetMetaData
@@ -172,6 +252,8 @@ public class DbCreationUtil {
 		ct.append("(");
 		boolean firstColumn = true;
 		if (config.getExtraColumn() != null) {
+			ct.append(config.getExtraColumnName());
+			ct.append(" ");
 			ct.append(config.getExtraColumn().getSqlType());
 			firstColumn = false;
 		}
@@ -221,7 +303,6 @@ public class DbCreationUtil {
 			dataType = config.getDataTypes().get(Integer.toString(i));
 			if (dataType == null) {
 				dataType = new LongVarcharDbType();
-				;
 			}
 		}
 		return dataType;

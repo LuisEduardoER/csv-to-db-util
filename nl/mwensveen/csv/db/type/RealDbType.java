@@ -27,6 +27,7 @@
  */
 package nl.mwensveen.csv.db.type;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -43,8 +44,12 @@ public class RealDbType implements DbType {
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getInsertValue(int, java.sql.ResultSet)
 	 */
 	public String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException {
-		float f = resultSet.getFloat(columnNumber);
+		float f = getValue(columnNumber, resultSet); 
 		return java.lang.Float.toString(f);
+	}
+
+	private float getValue(int columnNumber, ResultSet resultSet) throws SQLException {
+		return resultSet.getFloat(columnNumber);
 	}
 
 	/**
@@ -52,6 +57,13 @@ public class RealDbType implements DbType {
 	 */
 	public String getSqlType() {
 		return "REAL";
+	}
+
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		preparedStatement.setFloat(i, getValue(j, resultSet));
 	}
 
 }

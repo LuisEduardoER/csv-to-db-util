@@ -27,6 +27,7 @@
  */
 package nl.mwensveen.csv.db.type;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -54,8 +55,12 @@ public class VarcharDbType implements DbType {
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getInsertValue(int, java.sql.ResultSet)
 	 */
 	public String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException {
-		String s = resultSet.getString(columnNumber);
+		String s = getValue(columnNumber, resultSet);
 		return "'" + s + "'";
+	}
+
+	private String getValue(int columnNumber, ResultSet resultSet) throws SQLException {
+		return resultSet.getString(columnNumber);
 	}
 
 	/**
@@ -78,5 +83,10 @@ public class VarcharDbType implements DbType {
 	public int getLength() {
 		return length;
 	}
-
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		preparedStatement.setString(i, getValue(j, resultSet));
+	}	
 }

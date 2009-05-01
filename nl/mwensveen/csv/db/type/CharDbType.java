@@ -27,6 +27,7 @@
  */
 package nl.mwensveen.csv.db.type;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -53,11 +54,16 @@ public class CharDbType implements DbType {
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getInsertValue(int, java.sql.ResultSet)
 	 */
 	public String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException {
+		String value = getValue(columnNumber, resultSet);
+		return "'" + value + "'";
+	}
+
+	private String getValue(int columnNumber, ResultSet resultSet) throws SQLException {
 		String foo = resultSet.getString(columnNumber);
 		if (foo==null) {
 			foo="";
 		}
-		return "'" + foo + "'";
+		return foo;
 	}
 
 	/**
@@ -79,6 +85,14 @@ public class CharDbType implements DbType {
 	 */
 	public int getLength() {
 		return length;
+	}
+
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		preparedStatement.setString(i, getValue(j, resultSet));
+		
 	}
 
 }

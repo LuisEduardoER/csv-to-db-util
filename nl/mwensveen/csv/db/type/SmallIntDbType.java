@@ -27,6 +27,7 @@
  */
 package nl.mwensveen.csv.db.type;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -43,8 +44,12 @@ public class SmallIntDbType implements DbType {
 	 * @see nl.mwensveen.csv.db.type.api.DbType#getInsertValue(int, java.sql.ResultSet)
 	 */
 	public String getInsertValue(int columnNumber, ResultSet resultSet) throws SQLException {
-		short s = resultSet.getShort(columnNumber);
+		short s = getValue(columnNumber, resultSet);
 		return Short.toString(s);
+	}
+
+	private short getValue(int columnNumber, ResultSet resultSet) throws SQLException {
+		return resultSet.getShort(columnNumber);
 	}
 
 	/**
@@ -53,5 +58,10 @@ public class SmallIntDbType implements DbType {
 	public String getSqlType() {
 		return "SMALLINT";
 	}
-
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		preparedStatement.setShort(i, getValue(j, resultSet));
+	}
 }

@@ -27,6 +27,7 @@
  */
 package nl.mwensveen.csv.db.type;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -39,7 +40,7 @@ import nl.mwensveen.csv.db.type.api.DbType;
 public class FloatDbType implements DbType {
 	private RealDbType realEquivalent = new RealDbType();
 	private DoubleDbType doubleEquivalent = new DoubleDbType();
-	private int precision = 53;
+	private int precision = 52;
 
 	public FloatDbType() {
 		super();
@@ -83,6 +84,19 @@ public class FloatDbType implements DbType {
 	 */
 	public int getPrecision() {
 		return precision;
+	}
+
+	/**
+	 * @see nl.mwensveen.csv.db.type.api.DbType#insertIntoPreparedStatement(PreparedStatement, int, ResultSet, int)
+	 */
+	public void insertIntoPreparedStatement(PreparedStatement preparedStatement, int i, ResultSet resultSet, int j) throws SQLException {
+		if (precision <= 23) {
+			// equivalent to REAL
+			realEquivalent.insertIntoPreparedStatement(preparedStatement, i, resultSet, j);
+		} else {
+			// equivalent to DOUBLE.
+			doubleEquivalent.insertIntoPreparedStatement(preparedStatement, i, resultSet, j);
+		}
 	}
 
 }

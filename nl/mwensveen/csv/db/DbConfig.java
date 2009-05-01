@@ -44,9 +44,11 @@ public class DbConfig {
 	private String dataBaseName;
 	private Map<String, DbType> dataTypes;
 	private DbType extraColumn;
+	private String extraColumnName;
 	private String jdbcUrl = "";
 	private String tableName;
-
+	private DbConnectionManager dbConnectionManager;
+	private boolean usePreparedStatement;
 	/**
 	 * @return the extraColumn
 	 */
@@ -170,14 +172,14 @@ public class DbConfig {
 	/**
 	 * @return the dataTypes
 	 */
-	Map<String, DbType> getDataTypes() {
+	public Map<String, DbType> getDataTypes() {
 		return dataTypes;
 	}
 
 	/**
 	 * @return the tableName
 	 */
-	String getTableName() {
+	public String getTableName() {
 		return tableName;
 	}
 
@@ -186,6 +188,50 @@ public class DbConfig {
 	 */
 	boolean isCreateTable() {
 		return createTable;
+	}
+
+	/**
+	 * @param dbConnectionManager the dbConnectionManager to set
+	 */
+	public void setDbConnectionManager(DbConnectionManager dbConnectionManager) {
+		this.dbConnectionManager = dbConnectionManager;
+	}
+
+	/**
+	 * @return the dbConnectionManager
+	 */
+	public DbConnectionManager getDbConnectionManager() {
+		return dbConnectionManager;
+	}
+
+	/**
+	 * Indicates that the insert statements are done with a prepared statement. 
+	 * Otherwise a normal statement is used.
+	 * @param usePreparedStatement the usePreparedStatement to set
+	 */
+	public void setUsePreparedStatement(boolean usePreparedStatement) {
+		this.usePreparedStatement = usePreparedStatement;
+	}
+
+	/**
+	 * @return the usePreparedStatement
+	 */
+	public boolean isUsePreparedStatement() {
+		return usePreparedStatement;
+	}
+
+	/**
+	 * @param extraColumnName the extraColumnName to set
+	 */
+	public void setExtraColumnName(String extraColumnName) {
+		this.extraColumnName = extraColumnName;
+	}
+
+	/**
+	 * @return the extraColumnName
+	 */
+	public String getExtraColumnName() {
+		return extraColumnName;
 	}
 
 }
