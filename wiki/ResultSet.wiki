@@ -1,0 +1,2 @@
+#summary ResultSet api
+see [http://java.sun.com/javase/6/docs/api/java/sql/ResultSet.html java.sql.ResultSet]
