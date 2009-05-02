@@ -1,0 +1,42 @@
+#summary How to configure the DbCreationUtil
+
+= Introduction =
+
+When the DbCreationUtil creates a table and populates it, it needs to have information about that table. You supply this info with the DbConfig object.
+
+
+= Details =
+
+Here is an overview of the properties you can set on the DbConfig
+
+*jdbcUrl*
+||type||String||
+||usage||With this property you specify the jdbc connection url that the utility must use. And after the DbCreationUtil is finished you can retrieve the jdbc connection url that was used (so you can get the default jdbcUrl if needed).||
+||default||jdbc:derby:_databaseName_;create=true;||
+
+*dataBaseName*
+||type||String||
+||Usage||With this property you can pecify the database name that the DbCreationUtil uses when no jdbcUrl is given||
+||default||CSVdb||
+
+*tableName*
+||type||String||
+||usage||With this property you tell the utility the table name that needs to be created and populated.||
+||default||csvTable||
+
+*createTable*
+||type||boolean||
+||usage||With this property you indicate whether the utility must first create a new table (true) or if an existing table is used (false)||
+||default||true||
+
+*dataTypes*
+
+*extraColumn*
+
+*extraColumnName*
+
+*dbConnectionManager*
+
+*usePreparedStatement*
+
+*dataTypes*
