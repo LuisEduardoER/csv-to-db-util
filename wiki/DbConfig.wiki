@@ -30,6 +30,9 @@ Here is an overview of the properties you can set on the DbConfig
 ||default||true||
 
 *dataTypes*
+||type||Map<String, DbType>||
+||useage||With this map you specify what the type of a column in the table is. As key you specify the columnName (corresponding to the ResultSetMetaData) or the ColumnNumber as Integer.toString(). Note that the first column in a ResultSet is column 1.||
+||default||for any column that cannot be found in the dataTypes, the type LongVarcharDbType is used.||
 
 *extraColumn*
 
@@ -38,5 +41,3 @@ Here is an overview of the properties you can set on the DbConfig
 *dbConnectionManager*
 
 *usePreparedStatement*
-
-*dataTypes*
