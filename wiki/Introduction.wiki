@@ -14,4 +14,4 @@ After I searched for a tool that could meet these requirements, I decided that I
   * As storing the data in a database would be temporary, the tools should be able to create a database Table with columns of the correct type.
 
 To meet my requirements and wishes, I created to utilities in the project.
-First there is the *[CSVParser CSVParser utility]* and than there is the *[DBCreationUtil DBCreationUtil utility]*. 
+First there is the *[CSVParser CSVParser utility]* and than there is the *[DbCreationUtil DbCreationUtil utility]*. 
