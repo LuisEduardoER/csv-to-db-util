@@ -1,0 +1,36 @@
+#summary How to configure the CSVParser
+
+= Introduction =
+
+When you parse a csv-file to a resultset (or database) you can tell the CSVParser how to handle the parsing. This is done by using a CSVConfig object.
+
+
+= Details =
+
+Here is an overview of the properties you can set in the CSVConfig
+
+
+*columnNames*
+||type||Map<Integer, String> ||
+||usage||With this property you can set the column names. Set the column number (starting with 1) as key in the map. <br>If the CSV file does not contain a first row with column names, the names you specify with this property will be used.<br>If the CSV file does contain column names, you can use this property to override the ones in the file.||
+||default||If a column name cannot be determined based on this property or on the csv-file, the CSVParser will create a column name: Field{columnnumer}||
+
+*datePattern*
+||type||String||
+||usage||With this property you can set the datepatern to be used by the CSVParser when it converts a String into a Date.<br>The parsing will only be done when you call the _getDate_ method on the ResultSet.This way you can set this property to the correct pattern before parsing different columns.||
+||default||"yyyyMMdd"||
+
+*decimalPoint*
+||type||char||
+||usage||With this property you can set the decimalPoint that is used when the CSVParser converts a String into a number.||
+||default||.||
+
+*seperator*
+||type||char||
+||usage||With this property you can tell the CSVParser which character is used in the CSV file to seperate the columns.||
+||default||,||
+
+*startWithMetaDataRow*
+||type||boolean||
+||usage||With this property you tell the CSVParser that the CSV file begins with a row with metadata (=column names) (true) or if the first row already contains data (false).||
+||default||true||
