@@ -29,15 +29,26 @@ Here is an overview of the properties you can set on the DbConfig
 ||usage||With this property you indicate whether the utility must first create a new table (true) or if an existing table is used (false)||
 ||default||true||
 
-*dataTypes*
-||type||Map<String, DbType>||
-||useage||With this map you specify what the type of a column in the table is. As key you specify the columnName (corresponding to the ResultSetMetaData) or the ColumnNumber as Integer.toString(). Note that the first column in a ResultSet is column 1.||
+*dataTypes*||type||Map<String, [DbType]>||
+||useage||With this map you specify what the type of a column in the table is. As key you specify the columnName (corresponding to the ResultSetMetaData) or the column number as Integer.toString(). Note that the first column in a ResultSet is column 1.||
 ||default||for any column that cannot be found in the dataTypes, the type LongVarcharDbType is used.||
 
 *extraColumn*
+||type||[DbType]||
+||usage||With this property you can tell the DbCreationUtil to add an extra column to the table, that is not in the ResultSet. Typical use is adding a primarykey. If this property is null, no extra column is created.||
+||default||null||
 
 *extraColumnName*
+||type||String||
+||usage||With this property you specify the name the DbCreationUtil will you when creating an _extraColumn_.||
+||default||null||
 
 *dbConnectionManager*
+||type||[DbConnectionManager]||
+||usage||With this property you can set the connection manager that must be used||
+||default||DefaultDbConnectionManager||
 
 *usePreparedStatement*
+||type||boolean||
+||usage||With this property you tell the DbCreationUtil that the insert statements must be done using a prepared statement (true) or must be done by creating a sql String (false)||
+||default||false||
