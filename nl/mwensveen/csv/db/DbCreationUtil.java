@@ -154,26 +154,47 @@ public class DbCreationUtil {
 	 * @throws SQLException
 	 */
 	private String makeInsertStatement(ResultSet resultset) throws SQLException {
+		ResultSetMetaData metaData = resultset.getMetaData();
+
 		StringBuilder is = new StringBuilder();
 		is.append("insert into ");
 		is.append(config.getTableName());
-		is.append(" values (");
+		is.append(" (");
+		
 
+		// logic here for setting column names from header values
+		int count = metaData.getColumnCount();
 		boolean firstColumn = true;
+		
 		if (config.getExtraColumn() != null) {
-			is.append(config.getExtraColumn().getInsertValue(0, resultset));
+			is.append(config.getExtraColumnName());
 			firstColumn = false;
 		}
-
-		ResultSetMetaData metadata = resultset.getMetaData();
-		int count = metadata.getColumnCount();
 		for (int i = 1; i <= count; i++) {
 			if (!firstColumn) {
 				is.append(", ");
 			} else {
 				firstColumn = false;
 			}
-			DbType dataType = getDataType(i, metadata);
+			is.append(metaData.getColumnName(i));
+		}
+		
+		is.append(") values (");
+
+		firstColumn = true;
+		if (config.getExtraColumn() != null) {
+			is.append(config.getExtraColumn().getInsertValue(0, resultset));
+			firstColumn = false;
+		}
+
+		count = metaData.getColumnCount();
+		for (int i = 1; i <= count; i++) {
+			if (!firstColumn) {
+				is.append(", ");
+			} else {
+				firstColumn = false;
+			}
+			DbType dataType = getDataType(i, metaData);
 			String cellValue = dataType.getInsertValue(i, resultset);
 			is.append(cellValue);
 		}
@@ -215,15 +236,34 @@ public class DbCreationUtil {
 
 		ps.append("insert into ");
 		ps.append(config.getTableName());
-		ps.append(" values (");
-
+		ps.append(" (");
+		
+		// logic here for setting column names from header values
+		int count = metaData.getColumnCount();
 		boolean firstColumn = true;
+		
+		if (config.getExtraColumn() != null) {
+			ps.append(config.getExtraColumnName());
+			firstColumn = false;
+		}
+		for (int i = 1; i <= count; i++) {
+			if (!firstColumn) {
+				ps.append(", ");
+			} else {
+				firstColumn = false;
+			}
+			ps.append(metaData.getColumnName(i));
+		}
+
+		ps.append(") values (");
+
+		firstColumn = true;
 		if (config.getExtraColumn() != null) {
 			ps.append("?");
 			firstColumn = false;
 		}
 
-		int count = metaData.getColumnCount();
+		count = metaData.getColumnCount();
 		for (int i = 1; i <= count; i++) {
 			if (!firstColumn) {
 				ps.append(", ");
